@@ -186,6 +186,8 @@
         transition: opacity 0.8s ease;
         flex-shrink: 0;
         margin-bottom: 50px;
+        user-select: none;
+        -webkit-user-drag: none;
       }
 
       .envelope-layer {
@@ -196,6 +198,8 @@
         height: 100%;
         object-fit: contain;
         transition: all 0.5s ease-in-out;
+        user-select: none;
+        -webkit-user-drag: none;
       }
 
       /* --- ENVELOPE STATES MATRIX --- */
@@ -267,6 +271,8 @@
         overflow: hidden;
         border-radius: 4px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        user-select: none;
+        -webkit-user-drag: none;
       }
 
       .collage-item img {
@@ -276,6 +282,8 @@
         object-fit: contain;
         display: block;
         transition: transform 0.4s ease;
+        user-select: none;
+        -webkit-user-drag: none;
       }
 
       /* Adds a subtle zoom-in indicator hint once revealed */
@@ -591,11 +599,11 @@
     </div>
 
     <div id="volume-widget">
-      <button id="volume-toggle-btn" onclick="togglePlayerDrawer()" title="Music Player">
+      <button id="volume-toggle-btn" onclick="togglePlayerDrawer(event)" title="Music Player">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-music"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
       </button>
 
-      <div id="player-drawer-content">
+      <div id="player-drawer-content" onclick="event.stopPropagation()">
         <div class="music-title-container">
           <div class="music-title">Voor Dilan &mdash; Dulu Kita Masih Remaja (2018 Remaster)</div>
         </div>
@@ -622,34 +630,34 @@
     </audio>
 
     <div id="envelope-container" data-stage="sealed" onclick="advanceEnvelopeStage()">
-      <img id="layer-card-two" class="envelope-layer" src="asset/image/image_4.png" alt="Second Letter Content" />
-      <img id="layer-full-card" class="envelope-layer" src="asset/image/image_3.png" alt="First Letter Content" />
-      <img id="layer-opened" class="envelope-layer" src="asset/image/image_2.png" alt="Envelope Open" />
-      <img id="layer-sealed" class="envelope-layer" src="asset/image/image_1.png" alt="Envelope Closed" />
+      <img id="layer-card-two" class="envelope-layer" src="asset/image/image_4.png" alt="Second Letter Content" draggable="false" />
+      <img id="layer-full-card" class="envelope-layer" src="asset/image/image_3.png" alt="First Letter Content" draggable="false" />
+      <img id="layer-opened" class="envelope-layer" src="asset/image/image_2.png" alt="Envelope Open" draggable="false" />
+      <img id="layer-sealed" class="envelope-layer" src="asset/image/image_1.png" alt="Envelope Closed" draggable="false" />
     </div>
 
     <div class="collage-container">
       <h2>Momen Kebersamaan Kita</h2>
       <div class="image-collage">
-        <div class="collage-item landscape-left" onclick="handleCollageItemClick(this)">
+        <div class="collage-item landscape-left" onclick="handleCollageItemClick(event, this)">
           <div class="reveal-overlay"><div class="reveal-text">Klik untuk melihat</div></div>
-          <img src="asset/image/16_9a.png" alt="Memory 1" />
+          <img src="asset/image/16_9a.png" alt="Memory 1" draggable="false" />
         </div>
-        <div class="collage-item landscape-right" onclick="handleCollageItemClick(this)">
+        <div class="collage-item landscape-right" onclick="handleCollageItemClick(event, this)">
           <div class="reveal-overlay"><div class="reveal-text">Klik untuk melihat</div></div>
-          <img src="asset/image/16_9b.png" alt="Memory 2" />
+          <img src="asset/image/16_9b.png" alt="Memory 2" draggable="false" />
         </div>
-        <div class="collage-item portrait-left" onclick="handleCollageItemClick(this)">
+        <div class="collage-item portrait-left" onclick="handleCollageItemClick(event, this)">
           <div class="reveal-overlay"><div class="reveal-text">Klik untuk melihat</div></div>
-          <img src="asset/image/4_5a.png" alt="Memory 3" />
+          <img src="asset/image/4_5a.png" alt="Memory 3" draggable="false" />
         </div>
-        <div class="collage-item portrait-right" onclick="handleCollageItemClick(this)">
+        <div class="collage-item portrait-right" onclick="handleCollageItemClick(event, this)">
           <div class="reveal-overlay"><div class="reveal-text">Klik untuk melihat</div></div>
-          <img src="asset/image/4_5b.png" alt="Memory 4" />
+          <img src="asset/image/4_5b.png" alt="Memory 4" draggable="false" />
         </div>
-        <div class="collage-item tall-center" onclick="handleCollageItemClick(this)">
+        <div class="collage-item tall-center" onclick="handleCollageItemClick(event, this)">
           <div class="reveal-overlay"><div class="reveal-text">Klik untuk melihat</div></div>
-          <img src="asset/image/9_16.png" alt="Memory 5" />
+          <img src="asset/image/9_16.png" alt="Memory 5" draggable="false" />
         </div>
       </div>
     </div>
@@ -659,7 +667,7 @@
         <button id="lightbox-close-btn" onclick="closeImageLightbox()" title="Close Image">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
-        <img id="lightbox-img" src="" alt="Enlarged view" />
+        <img id="lightbox-img" src="" alt="Enlarged view" draggable="false" />
       </div>
     </div>
 
@@ -816,7 +824,8 @@
       }
 
       // 4. MUSIC DRAWER UTILITIES
-      function togglePlayerDrawer() {
+      function togglePlayerDrawer(event) {
+        event.stopPropagation(); // Prevents instant auto-collapsing
         const widget = document.getElementById("volume-widget");
         widget.classList.toggle("expanded");
       }
@@ -856,13 +865,15 @@
       // Click outside to collapse player widget
       document.addEventListener("click", function (event) {
         const widget = document.getElementById("volume-widget");
-        if (!widget.contains(event.target)) {
+        if (widget && !widget.contains(event.target)) {
           widget.classList.remove("expanded");
         }
       });
 
       // 5. INTERACTIVE COLLAGE & LIGHTBOX UTILITIES
-      function handleCollageItemClick(element) {
+      function handleCollageItemClick(event, element) {
+        event.stopPropagation(); // Stop parent elements or global handlers from acting on this click
+        
         if (!element.classList.contains("revealed")) {
           element.classList.add("revealed");
         } else {
@@ -943,14 +954,15 @@
 
           setTimeout(() => {
             flash.classList.remove("active");
-            
+            isTransitioning = false;
+          }, 900);
+
+          setTimeout(() => {
             collage.scrollIntoView({ 
               behavior: "smooth", 
               block: "start" 
             });
-
-            isTransitioning = false;
-          }, 900);
+          }, 1500);
         }
       }
     </script>
