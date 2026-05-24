@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A Letter for Menpera</title>
+    <title>Surat Kelulusan - Kelas 2026</title>
+    
+    <link rel="preload" href="asset/font/Runethia.otf" as="font" type="font/opentype" crossorigin>
+
     <style>
       /* ==========================================================================
          SECTION 1: GLOBAL STYLES & TYPOGRAPHY
@@ -677,6 +680,8 @@
       ];
 
       let loadedCount = 0;
+      let imagesReady = false;
+      let fontsReady = false;
       let appReadyToStart = false;
       let isTransitioning = false; 
       
@@ -685,12 +690,17 @@
       let lastActiveVolume = storedVolume !== null ? parseFloat(storedVolume) : 0.3;
       if (lastActiveVolume === 0) lastActiveVolume = 0.3;
 
-      // Track strictly against the asset array count to lock down accurate loading conditions
       const totalAssets = assetsToPreload.length;
 
       document.getElementById("volume-slider").value = storedVolume !== null ? storedVolume : "0.3";
 
-      // Unlocks entry hint screen view smoothly
+      // Consolidated check ensures both fonts AND images are locked before showing the hint
+      function evaluateAppReadiness() {
+        if (imagesReady && fontsReady) {
+          showInteractionHint();
+        }
+      }
+
       function showInteractionHint() {
         if (appReadyToStart) return; 
         appReadyToStart = true;
@@ -710,7 +720,8 @@
       function checkAllAssetsLoaded() {
         loadedCount++;
         if (loadedCount >= totalAssets) {
-          showInteractionHint();
+          imagesReady = true;
+          evaluateAppReadiness();
         }
       }
 
@@ -727,9 +738,23 @@
         };
         img.onerror = () => {
           console.error("Failed to load asset path:", src);
-          checkAllAssetsLoaded(); // Safety iteration fallback step
+          checkAllAssetsLoaded(); 
         };
       });
+
+      // 2.5 NATIVE FONT TRACKING PIPELINE
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          fontsReady = true;
+          evaluateAppReadiness();
+        }).catch((err) => {
+          console.warn("Font loading tracking error:", err);
+          fontsReady = true; // Fallback so page doesn't break
+          evaluateAppReadiness();
+        });
+      } else {
+        fontsReady = true; // Fallback for ancient browsers
+      }
 
       // 3. AUDIO PRELOAD BALANCER
       const music = document.getElementById("bg-music");
@@ -742,6 +767,8 @@
       setTimeout(() => { 
         if (!appReadyToStart) {
           console.warn("Preloader threshold reached. Forcing view accessibility layer.");
+          imagesReady = true;
+          fontsReady = true;
           showInteractionHint(); 
         }
       }, 15000);
