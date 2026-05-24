@@ -687,8 +687,15 @@
         "asset/image/16_9b.png",
       ];
 
+      // Audio paths to strictly track
+      const audioToPreload = [
+        { id: "bg-music", src: "asset/music/music.mp3" },
+        { id: "rustle-sound", src: "asset/music/paper_rustle.mp3" }
+      ];
+
       let loadedCount = 0;
       let imagesReady = false;
+      let audioReady = false; 
       let fontsReady = false;
       let appReadyToStart = false;
       let isTransitioning = false; 
@@ -698,13 +705,14 @@
       let lastActiveVolume = storedVolume !== null ? parseFloat(storedVolume) : 0.3;
       if (lastActiveVolume === 0) lastActiveVolume = 0.3;
 
-      const totalAssets = assetsToPreload.length;
+      // Total assets is now the sum of images AND audio files
+      const totalAssets = assetsToPreload.length + audioToPreload.length;
 
       document.getElementById("volume-slider").value = storedVolume !== null ? storedVolume : "0.3";
 
-      // Consolidated check ensures both fonts AND images are locked before showing the hint
+      // Consolidated check ensures fonts, images, AND audio are locked before showing the hint
       function evaluateAppReadiness() {
-        if (imagesReady && fontsReady) {
+        if (imagesReady && audioReady && fontsReady) {
           showInteractionHint();
         }
       }
@@ -725,10 +733,12 @@
         }, 400);
       }
 
-      function checkAllAssetsLoaded() {
+      function checkAssetLoaded() {
         loadedCount++;
+        
         if (loadedCount >= totalAssets) {
           imagesReady = true;
+          audioReady = true;
           evaluateAppReadiness();
         }
       }
@@ -739,15 +749,38 @@
         img.src = src;
         img.onload = () => {
           if (typeof img.decode === "function") {
-            img.decode().then(checkAllAssetsLoaded).catch(() => checkAllAssetsLoaded());
+            img.decode().then(checkAssetLoaded).catch(() => checkAssetLoaded());
           } else {
-            checkAllAssetsLoaded();
+            checkAssetLoaded();
           }
         };
         img.onerror = () => {
           console.error("Failed to load asset path:", src);
-          checkAllAssetsLoaded(); 
+          checkAssetLoaded(); 
         };
+      });
+
+      // 3. AUDIO PRELOAD PIPELINE (Tied directly to the preloader engine)
+      const music = document.getElementById("bg-music");
+      const rustle = document.getElementById("rustle-sound");
+
+      audioToPreload.forEach((audioAsset) => {
+        const el = document.getElementById(audioAsset.id);
+        
+        // If it's already fully ready
+        if (el.readyState >= 4) {
+          checkAssetLoaded();
+        } else {
+          // Listen for full buffering capacity
+          el.addEventListener("canplaythrough", checkAssetLoaded, { once: true });
+          el.addEventListener("error", () => {
+            console.error("Failed to buffer audio path:", audioAsset.src);
+            checkAssetLoaded(); 
+          }, { once: true });
+          
+          // Force active stream fetch on configuration initialization
+          el.load();
+        }
       });
 
       // 2.5 NATIVE FONT TRACKING PIPELINE
@@ -764,18 +797,12 @@
         fontsReady = true; // Fallback for ancient browsers
       }
 
-      // 3. AUDIO PRELOAD BALANCER
-      const music = document.getElementById("bg-music");
-      const rustle = document.getElementById("rustle-sound");
-
-      if (music.readyState < 1) music.addEventListener("loadedmetadata", () => {}, { once: true });
-      if (rustle.readyState < 1) rustle.addEventListener("loadedmetadata", () => {}, { once: true });
-
       // Generous 15-second network lag protection barrier
       setTimeout(() => { 
         if (!appReadyToStart) {
           console.warn("Preloader threshold reached. Forcing view accessibility layer.");
           imagesReady = true;
+          audioReady = true;
           fontsReady = true;
           showInteractionHint(); 
         }
@@ -825,7 +852,7 @@
 
       // 4. MUSIC DRAWER UTILITIES
       function togglePlayerDrawer(event) {
-        event.stopPropagation(); // Prevents instant auto-collapsing
+        event.stopPropagation(); 
         const widget = document.getElementById("volume-widget");
         widget.classList.toggle("expanded");
       }
@@ -872,7 +899,7 @@
 
       // 5. INTERACTIVE COLLAGE & LIGHTBOX UTILITIES
       function handleCollageItemClick(event, element) {
-        event.stopPropagation(); // Stop parent elements or global handlers from acting on this click
+        event.stopPropagation(); 
         
         if (!element.classList.contains("revealed")) {
           element.classList.add("revealed");
